@@ -25,13 +25,13 @@ body {
 .top .date { font-size:13px; letter-spacing:.18em; color:#a89880; }
 .top h1 { font-size:30px; font-weight:900; letter-spacing:.06em; margin-top:4px; }
 .top h1 .en { display:block; font-size:12px; font-weight:500; letter-spacing:.3em; color:#c4b49c; margin-top:2px; }
+.top .time-hint { font-size:12px; color:#c4b49c; margin-top:8px; }
 
-/* 類別徽章 */
 .chip {
   display:inline-flex; align-items:center; gap:6px;
   font-size:14px; font-weight:700;
   padding:6px 16px; border-radius:999px;
-  margin:10px auto 14px;
+  margin:10px auto 0;
 }
 .chip.fire   { background:#ffe3d6; color:#c2472c; }
 .chip.amb    { background:#dff0e4; color:#2e7d4f; }
@@ -50,93 +50,103 @@ body {
 @keyframes inL { from { opacity:0; transform:translateX(40px);} to { opacity:1; transform:none;} }
 @keyframes inR { from { opacity:0; transform:translateX(-40px);} to { opacity:1; transform:none;} }
 @media (prefers-reduced-motion: reduce){ .card{ animation:none !important } }
-.photo {
-  width:100%; aspect-ratio:4/3; object-fit:cover; display:block;
-  background:#f0e8dc;
-}
-.body { padding:22px 22px 24px; }
+.photo { width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:#f0e8dc; }
+.head { padding:20px 22px 6px; }
 .name { font-size:26px; font-weight:900; line-height:1.3; }
 .country { font-size:15px; color:#8d7f6d; margin-top:4px; }
 
-.facts { margin-top:16px; display:flex; flex-direction:column; gap:10px; }
-.fact {
-  display:flex; gap:10px; align-items:flex-start;
-  font-size:16.5px; line-height:1.65;
+/* 段落（手風琴） */
+.sec { border-top:1px solid #f3ece0; }
+.sec-btn {
+  width:100%; border:none; background:none; cursor:pointer;
+  display:flex; align-items:center; gap:10px;
+  padding:16px 22px; font-family:inherit; text-align:left;
 }
+.sec-btn .ico { font-size:22px; flex:none; }
+.sec-btn .ti { font-size:17px; font-weight:900; flex:1; }
+.sec-btn .mins { font-size:11.5px; color:#c4b49c; flex:none; }
+.sec-btn .arrow { color:#c4b49c; flex:none; transition:.25s; font-size:13px; }
+.sec.open .sec-btn .arrow { transform:rotate(90deg); }
+.sec-body { display:none; padding:2px 22px 20px; }
+.sec.open .sec-body { display:block; }
+
+/* 認識它 */
+.facts { display:flex; flex-direction:column; gap:10px; }
+.fact { display:flex; gap:10px; align-items:flex-start; font-size:16.5px; line-height:1.65; }
 .fact .dot { flex:none; margin-top:9px; width:8px; height:8px; border-radius:50%; background:#f0b429; }
 
-/* 可點的詞彙 */
-.w {
-  font:inherit; border:none; cursor:pointer;
-  background:#fff3d6; color:#8a5b13; font-weight:700;
-  border-bottom:2px dashed #e0a93e;
-  padding:0 3px; border-radius:6px 6px 0 0;
-}
+/* 詞彙 */
+.w { font:inherit; border:none; cursor:pointer; background:#fff3d6; color:#8a5b13; font-weight:700;
+     border-bottom:2px dashed #e0a93e; padding:0 3px; border-radius:6px 6px 0 0; }
 .w:active { background:#ffe7ae; }
 
-.talk {
-  margin-top:20px;
-  background:#fff3d6;
-  border-radius:16px;
-  padding:14px 16px;
-  font-size:15.5px; line-height:1.7;
-}
-.talk .t { font-size:12.5px; font-weight:700; letter-spacing:.14em; color:#b98a1e; margin-bottom:4px; }
+/* 找一找 */
+.find-item { background:#fbf6ec; border-radius:14px; padding:12px 14px; margin-bottom:10px; }
+.find-item .q { font-size:15.5px; line-height:1.6; font-weight:700; }
+.find-item .reveal { margin-top:8px; border:none; cursor:pointer; font-family:inherit;
+  background:#f0e8dc; color:#5c554e; font-size:13.5px; font-weight:700; padding:7px 16px; border-radius:999px; }
+.find-item .a { display:none; margin-top:8px; font-size:15px; line-height:1.7; color:#5c554e;
+  background:#fff; border-radius:10px; padding:10px 12px; }
+.find-item.shown .a { display:block; }
+.find-item.shown .reveal { display:none; }
 
-/* 導覽（滑動提示 + 桌機箭頭） */
-.nav {
-  margin-top:16px;
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-.nav button {
-  border:none; cursor:pointer;
-  background:#ffffff; color:#8d7f6d;
-  font-size:15px; font-weight:700;
-  padding:10px 18px; border-radius:999px;
-  box-shadow:0 4px 14px rgba(120,90,50,.1);
-  font-family:inherit;
-}
+/* 裝備 */
+.equip-item { display:flex; gap:12px; align-items:flex-start; margin-bottom:12px; }
+.equip-item .en { font-size:15.5px; font-weight:900; flex:none; min-width:7.5em; }
+.equip-item .ed { font-size:15px; line-height:1.65; color:#5c554e; }
+
+/* 故事 */
+.story-title { font-size:17px; font-weight:900; margin-bottom:10px; }
+.story-text { font-size:16px; line-height:2; color:#4a443e; white-space:pre-line; }
+.story-tip { margin-top:12px; font-size:12.5px; color:#b3a48d; }
+
+/* 猜一猜 */
+.quiz-item { margin-bottom:18px; }
+.quiz-item .qq { font-size:16px; font-weight:900; line-height:1.6; margin-bottom:10px; }
+.opt { display:block; width:100%; text-align:left; border:2px solid #f0e8dc; background:#fff;
+  border-radius:12px; padding:11px 14px; font-size:15.5px; font-family:inherit; cursor:pointer; margin-bottom:8px; }
+.opt.correct { border-color:#4caf7d; background:#eaf7f0; font-weight:700; }
+.opt.wrong { border-color:#e08a8a; background:#fdeeee; animation:shake .3s; }
+@keyframes shake { 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+.quiz-why { display:none; font-size:14.5px; line-height:1.7; color:#2e7d4f;
+  background:#eaf7f0; border-radius:10px; padding:10px 12px; margin-top:4px; }
+.quiz-item.done .quiz-why { display:block; }
+
+/* 動一動 / 聊一聊 */
+.move-box { background:#fff3d6; border-radius:16px; padding:16px; font-size:15.5px; line-height:1.8; }
+.talks { display:flex; flex-direction:column; gap:10px; }
+.talk-item { display:flex; gap:10px; font-size:15.5px; line-height:1.7; }
+.talk-item .n { flex:none; width:24px; height:24px; border-radius:50%; background:#f0b429; color:#fff;
+  font-size:13px; font-weight:900; display:flex; align-items:center; justify-content:center; margin-top:3px; }
+
+/* 導覽 */
+.nav { margin-top:16px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.nav button { border:none; cursor:pointer; background:#ffffff; color:#8d7f6d;
+  font-size:15px; font-weight:700; padding:10px 18px; border-radius:999px;
+  box-shadow:0 4px 14px rgba(120,90,50,.1); font-family:inherit; }
 .nav button:disabled { opacity:.35; cursor:default; }
 .nav .hint { font-size:12px; color:#c4b49c; letter-spacing:.08em; text-align:center; flex:1; }
-.backtoday {
-  display:none; margin:14px auto 0;
-  border:none; cursor:pointer; font-family:inherit;
-  background:#3a3430; color:#fff8ef; font-size:14px; font-weight:700;
-  padding:10px 22px; border-radius:999px;
-}
+.backtoday { display:none; margin:14px auto 0; border:none; cursor:pointer; font-family:inherit;
+  background:#3a3430; color:#fff8ef; font-size:14px; font-weight:700; padding:10px 22px; border-radius:999px; }
 
 /* 詞彙彈出卡 */
-.sheet-mask {
-  position:fixed; inset:0; background:rgba(58,52,48,.45);
-  display:none; align-items:flex-end; justify-content:center; z-index:50;
-}
+.sheet-mask { position:fixed; inset:0; background:rgba(58,52,48,.45);
+  display:none; align-items:flex-end; justify-content:center; z-index:50; }
 .sheet-mask.open { display:flex; }
-.sheet {
-  width:100%; max-width:560px;
-  background:#fffdf8; border-radius:24px 24px 0 0;
-  padding:28px 24px 40px; text-align:center;
-  animation:up .28s cubic-bezier(.22,1,.36,1);
-}
+.sheet { width:100%; max-width:560px; background:#fffdf8; border-radius:24px 24px 0 0;
+  padding:28px 24px 40px; text-align:center; animation:up .28s cubic-bezier(.22,1,.36,1); }
 @keyframes up { from { transform:translateY(40px); opacity:0 } to { transform:none; opacity:1 } }
 .sheet .big { font-size:64px; line-height:1.2; }
 .sheet .word { font-size:24px; font-weight:900; margin-top:8px; }
 .sheet .desc { font-size:16.5px; line-height:1.8; color:#5c554e; margin-top:8px; }
-.sheet .close {
-  margin-top:18px; border:none; cursor:pointer; font-family:inherit;
-  background:#f0e8dc; color:#5c554e; font-size:15px; font-weight:700;
-  padding:10px 28px; border-radius:999px;
-}
+.sheet .close { margin-top:18px; border:none; cursor:pointer; font-family:inherit;
+  background:#f0e8dc; color:#5c554e; font-size:15px; font-weight:700; padding:10px 28px; border-radius:999px; }
 
-/* 小提示氣泡 */
-#toast {
-  position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px);
-  background:#3a3430; color:#fff8ef;
-  font-size:14.5px; padding:10px 20px; border-radius:999px;
-  opacity:0; pointer-events:none; transition:.25s; z-index:60; white-space:nowrap;
-}
+#toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px);
+  background:#3a3430; color:#fff8ef; font-size:14.5px; padding:10px 20px; border-radius:999px;
+  opacity:0; pointer-events:none; transition:.25s; z-index:60; white-space:nowrap; }
 #toast.show { opacity:1; transform:translateX(-50%); }
 
-/* 頁尾 */
 .foot { margin-top:26px; text-align:center; font-size:11.5px; color:#b3a48d; line-height:1.9; }
 .foot a { color:inherit; }
 </style>
@@ -147,18 +157,11 @@ body {
     <div class="date" id="today-date"></div>
     <h1>今日車車<span class="en">TODAY'S CAR</span></h1>
     <div id="chip"></div>
+    <div class="time-hint">🕐 一天一台車，陪玩大約 20 分鐘</div>
   </header>
 
   <div class="stage" id="stage">
-    <main class="card" id="card">
-      <img class="photo" id="photo" alt="今天的車車照片">
-      <div class="body">
-        <div class="name" id="name"></div>
-        <div class="country" id="country"></div>
-        <div class="facts" id="facts"></div>
-        <div class="talk"><div class="t">跟爸爸媽媽聊一聊</div><div id="talk"></div></div>
-      </div>
-    </main>
+    <main class="card" id="card"></main>
   </div>
 
   <div class="nav">
@@ -184,130 +187,38 @@ body {
 </div>
 <div id="toast"></div>
 
+<script src="data.js"></script>
 <script>
+const { EPOCH, DICT, VEHICLES } = window.CAR_DATA;
 const CATS = {
   fire:   { label:"消防車", emoji:"🚒", cls:"fire" },
   amb:    { label:"救護車", emoji:"🚑", cls:"amb" },
   police: { label:"警車",   emoji:"🚓", cls:"police" }
 };
 
-/* 詞彙小字典：facts 裡用 [[詞]] 標記，按了會跳出說明 */
-const DICT = {
-  "水砲":   { emoji:"💦", desc:"裝在消防車上的超大水槍，可以把水噴得又高又遠。" },
-  "引擎":   { emoji:"⚙️", desc:"車車的心臟！它一動起來，車車才有力氣跑。" },
-  "醫護人員":{ emoji:"🧑‍⚕️", desc:"在救護車上照顧病人的人，會打針、包紮、量心跳。" },
-  "地震":   { emoji:"🫨", desc:"地面突然搖來搖去。記得：躲桌下、護頭頭、不搭電梯。" },
-  "古董":   { emoji:"🏺", desc:"很老很老、有很多故事的寶貝東西。" },
-  "雲梯":   { emoji:"🪜", desc:"會伸得很～長很～長的梯子，高得好像可以碰到雲，所以叫雲梯。" },
-  "急救工具":{ emoji:"🧰", desc:"救人用的百寶箱：繃帶、OK 繃、剪刀、手套都在裡面。" },
-  "站崗":   { emoji:"💂", desc:"站在一個地方守護大家，眼睛要張得大大的。" },
-  "救護員": { emoji:"🚑", desc:"第一個趕到現場幫忙受傷的人的人，跑得超快。" },
-  "醫療物品":{ emoji:"🩹", desc:"救人的東西，像急救箱、OK 繃、繃帶、藥藥。" },
-  "超級跑車":{ emoji:"🏎️", desc:"跑得非常非常快的車，車身低低的、聲音轟隆隆。" },
-  "巴騰堡格紋":{ emoji:"🍰", desc:"黃色配藍色的格子花紋，名字跟一種格子蛋糕一樣，超顯眼！" },
-  "警示燈": { emoji:"🚨", desc:"車頂上會閃會轉的燈，亮起來就是在說「讓一讓，我去幫忙了！」" }
-};
-
-/* 內容庫：消防→救護→警車 每日輪流 */
-const VEHICLES = [
-{ cat:"fire", name:"機場消防車「黑豹」", country:"🇭🇺 匈牙利・布達佩斯機場",
-  facts:["專門保護飛機的超大消防車，有六個大輪子","[[水砲]]像超級水槍，可以射得比操場還遠","[[引擎]]超有力，幾十秒就能衝到失火的飛機旁邊"],
-  talk:"為什麼機場要有自己的消防車呢？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Airport_crash_tender_-_Rosenbauer_Panther_-_Airport_Budapest_%289437%29.jpg/1280px-Airport_crash_tender_-_Rosenbauer_Panther_-_Airport_Budapest_%289437%29.jpg",
-  license:"CC BY-SA 4.0" },
-{ cat:"amb", name:"高規格救護車", country:"🇯🇵 日本設計",
-  facts:["車廂特別高，[[醫護人員]]可以站著照顧病人","裡面就像一間小小的醫院","開起來很平穩，躺著的病人不會晃來晃去"],
-  talk:"你猜救護車裡面放了哪些東西？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Toyota_Himedic_ambulance%2C_Bangladesh._%2833158014821%29.jpg/1280px-Toyota_Himedic_ambulance%2C_Bangladesh._%2833158014821%29.jpg",
-  license:"CC BY-SA 2.0" },
-{ cat:"police", name:"日本警車「皇冠」", country:"🇯🇵 日本",
-  facts:["黑色配白色，看起來很神氣","車頂有紅色的[[警示燈]]，會轉圈圈發光","日本人叫警車「趴斗卡」（パトカー）"],
-  talk:"台灣的警車長什麼樣子？下次在路上找找看！",
-  img:"https://upload.wikimedia.org/wikipedia/commons/2/23/TOYOTA_CROWN_Police_Car_2007-06.jpg",
-  license:"CC BY-SA 2.5" },
-{ cat:"fire", name:"地震體驗車", country:"🇯🇵 日本・東京",
-  facts:["這台車不滅火——它會「製造[[地震]]」！","車上有個小房間會搖來搖去，讓大家練習地震來了怎麼辦","日本地震很多，所以發明了這台特別的車"],
-  talk:"地震來的時候，我們家要躲在哪裡？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Jishin-Taikensha_experience_of_an_Artificial_Earthquake_in_2009_Tokyo.jpg/1280px-Jishin-Taikensha_experience_of_an_Artificial_Earthquake_in_2009_Tokyo.jpg",
-  license:"CC BY 2.0" },
-{ cat:"amb", name:"古董救護車爺爺", country:"🇺🇸 美國・50 年前",
-  facts:["這是 50 年前的救護車，像卡車一樣壯","以前的救護車長這樣，跟現在很不一樣","它是[[古董]]，現在的工作是讓大家認識歷史"],
-  talk:"車車退休以後，會去哪裡呢？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/1976_Chevrolet_C-30_Springfield_Type_I_Ambulance_of_the_PGFD.jpg/1280px-1976_Chevrolet_C-30_Springfield_Type_I_Ambulance_of_the_PGFD.jpg",
-  license:"Public domain" },
-{ cat:"police", name:"洛杉磯追風警車", country:"🇺🇸 美國・洛杉磯",
-  facts:["[[引擎]]聲音超級大聲，跑得超級快","車頂的[[警示燈]]會閃紅色和藍色","壞人開再快，也跑不過它"],
-  talk:"警察為什麼需要跑很快的車？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/LAPD_Dodge_charger_%28lights%29.jpg/1280px-LAPD_Dodge_charger_%28lights%29.jpg",
-  license:"Public domain" },
-{ cat:"fire", name:"雲梯消防車", country:"🇩🇪 德國",
-  facts:["車上的[[雲梯]]可以升到 10 層樓那麼高","梯子前面有個小籃子，消防員站在裡面救人","不用的時候，梯子會摺起來趴在車頂睡覺"],
-  talk:"為什麼消防車需要這麼長的梯子？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/IVECO_MAGIRUS_160E30_Drehleiter.jpg/1280px-IVECO_MAGIRUS_160E30_Drehleiter.jpg",
-  license:"CC BY-SA 4.0" },
-{ cat:"amb", name:"賓士救護車", country:"🇩🇪 德國",
-  facts:["德國的救護車是黃色配紅色，跟台灣的不一樣","車身高高方方的，裝滿了[[急救工具]]","德國人叫它「救援車」"],
-  talk:"台灣的救護車是什麼顏色的？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Rettungswagen_BRK_Sprinter-20180805-RM-173219.jpg/1280px-Rettungswagen_BRK_Sprinter-20180805-RM-173219.jpg",
-  license:"CC BY-SA 4.0" },
-{ cat:"police", name:"德國警車", country:"🇩🇪 德國・慕尼黑",
-  facts:["藍色配銀色，是德國警車的制服","車身上的「POLIZEI」就是德文的「警察」","這台正在大教堂旁邊[[站崗]]"],
-  talk:"為什麼每個國家的警車顏色都不一樣？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M%C3%BCnchen-_Innenstadt_%28bei_Frauenkirche%29-_Streifenwagen_der_Polizei_Bayern_%28BMW_M-PM-9036%29_1.4.2010.jpg/1280px-M%C3%BCnchen-_Innenstadt_%28bei_Frauenkirche%29-_Streifenwagen_der_Polizei_Bayern_%28BMW_M-PM-9036%29_1.4.2010.jpg",
-  license:"CC BY-SA 3.0" },
-{ cat:"fire", name:"美國大紅消防車", country:"🇺🇸 美國",
-  facts:["美國的消防車又大又長，車頭亮晶晶","它像一顆超強的心臟，把水用力打出去","鮮紅色的車身，遠遠就看得到"],
-  talk:"消防車的水是從哪裡來的？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Hamden_Fire_Engine_1%2C_Pierce_Dash_pumper_%2854539800778%29.jpg/1280px-Hamden_Fire_Engine_1%2C_Pierce_Dash_pumper_%2854539800778%29.jpg",
-  license:"CC BY-SA 2.0" },
-{ cat:"amb", name:"救護腳踏車", country:"🇬🇧 英國・倫敦",
-  facts:["沒看錯——腳踏車也可以當救護車！","人很多、汽車擠不進去的地方，[[救護員]]就騎車衝過去","後面的袋子裡裝著[[急救工具]]"],
-  talk:"還有什麼地方是汽車進不去、腳踏車進得去的？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/4/4f/London_Ambulance_-_NHS_Ambulance_bicycle_-_geograph.org.uk_-_5130875.jpg",
-  license:"CC BY-SA 2.0" },
-{ cat:"police", name:"藍寶堅尼警車", country:"🇮🇹 義大利",
-  facts:["[[超級跑車]]當警車，全世界最快的警車之一","它有一個特別任務：快速運送救命的[[醫療物品]]","全義大利只有幾台，超級稀有"],
-  talk:"如果你是警察，你最想開哪一台車？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/0/03/Lamborghini_Gallardo_Lp560_of_the_Polizia_di_Stato_%28front_view%29.jpg",
-  license:"CC BY-SA 3.0" },
-{ cat:"fire", name:"爬山小消防車", country:"🇨🇭 瑞士",
-  facts:["這台小消防車專門爬山路","大消防車進不去的小巷子，它都鑽得進去","它住在瑞士的山上，保護山裡的房子"],
-  talk:"為什麼山上需要小台一點的消防車？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Unimog_U_402_Feuerwehr_Klosters_Bild_1.jpg/1280px-Unimog_U_402_Feuerwehr_Klosters_Bild_1.jpg",
-  license:"Public domain" },
-{ cat:"amb", name:"救護摩托車", country:"🇭🇰 香港",
-  facts:["塞車的時候，摩托車[[救護員]]可以鑽來鑽去先趕到","先到的救護員先幫忙病人，等大救護車來","車尾的箱子裝滿了[[急救工具]]"],
-  talk:"為什麼摩托車可以比汽車先到？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Motorcycle_paramedic_on_Nathan_Road_in_Jordan%2C_Hong_Kong.jpg/1280px-Motorcycle_paramedic_on_Nathan_Road_in_Jordan%2C_Hong_Kong.jpg",
-  license:"CC BY-SA 4.0" },
-{ cat:"police", name:"英國格子蛋糕警車", country:"🇬🇧 英國・曼徹斯特",
-  facts:["車身上的黃藍格子叫[[巴騰堡格紋]]——跟一種格子蛋糕同名！","不管白天晚上，格子都超顯眼","遠遠看到格子，就知道警察來幫忙了"],
-  talk:"為什麼警車要穿這麼顯眼的衣服？",
-  img:"https://upload.wikimedia.org/wikipedia/commons/7/76/Greater_Manchester_Police_car_in_2003_livery%2C_14_June_2008.jpg",
-  license:"CC BY-SA 2.0" }
-];
-
-/* ── 日期邏輯：以台北時間為準，每天自動換車 ── */
-const EPOCH = "2026-07-10"; // 第 0 天
-function taipeiToday() {
-  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Taipei" });
-}
+/* 日期邏輯：台北時間，每天自動換車 */
+function taipeiToday() { return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Taipei" }); }
 const todayStr = taipeiToday();
-const todayNum = Math.round((new Date(todayStr) - new Date(EPOCH)) / 86400000); // 今天是第幾天
+const todayNum = Math.round((new Date(todayStr) - new Date(EPOCH)) / 86400000);
 const dbg = new URLSearchParams(location.search).get("d");
+let offset = 0;
+if (dbg !== null) offset = (+dbg) - todayNum;
 
-let offset = 0; // 0=今天，-1=昨天…（不能看未來）
-if (dbg !== null) offset = (+dbg) - todayNum; // ?d=N 直接跳到第 N 天（測試用）
-
-function idxOf(dayNum) { return ((dayNum % VEHICLES.length) + VEHICLES.length) % VEHICLES.length; }
-
+function idxOf(n) { return ((n % VEHICLES.length) + VEHICLES.length) % VEHICLES.length; }
 const el = id => document.getElementById(id);
 function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
-function renderFacts(facts){
-  return facts.map(f=>{
-    const html = esc(f).replace(/\[\[(.+?)\]\]/g, (_,w)=> DICT[w] ? `<button class="w" data-w="${w}">${w}</button>` : w);
-    return `<div class="fact"><span class="dot"></span><span>${html}</span></div>`;
-  }).join("");
+function vocab(s){
+  return esc(s).replace(/\[\[(.+?)\]\]/g, (_,w)=> DICT[w] ? `<button class="w" data-w="${w}">${w}</button>` : w);
+}
+
+function sectionHTML(id, ico, title, mins, inner, open=false){
+  return `<div class="sec ${open?"open":""}" id="sec-${id}">
+    <button class="sec-btn" data-sec="${id}">
+      <span class="ico">${ico}</span><span class="ti">${title}</span>
+      <span class="mins">${mins}</span><span class="arrow">▶</span>
+    </button>
+    <div class="sec-body">${inner}</div>
+  </div>`;
 }
 
 function render(dir) {
@@ -319,17 +230,49 @@ function render(dir) {
   const [y,m,d] = ds.split("-");
   const week = ["日","一","二","三","四","五","六"][dateObj.getDay()];
 
-  el("today-date").textContent = `${y} 年 ${+m} 月 ${+d} 日・星期${week}` + (offset === 0 ? "" : offset === -1 ? "（昨天）" : `（${-offset} 天前）`);
+  el("today-date").textContent = `${y} 年 ${+m} 月 ${+d} 日・星期${week}` + (offset === 0 ? "" : offset === -1 ? "（昨天）" : offset < 0 ? `（${-offset} 天前）` : "（預覽）");
   el("chip").innerHTML = `<span class="chip ${cat.cls}">${cat.emoji} ${offset===0?"今天是":"這天是"}${cat.label}日</span>`;
-  el("photo").src = v.img;
-  el("name").textContent = v.name;
-  el("country").textContent = v.country;
-  el("facts").innerHTML = renderFacts(v.facts);
-  el("talk").textContent = v.talk;
   el("license").textContent = v.license;
   document.title = `今日車車 ${cat.emoji} ${v.name}`;
 
-  el("next").disabled = offset >= 0;
+  const facts = `<div class="facts">` + v.facts.map(f=>`<div class="fact"><span class="dot"></span><span>${vocab(f)}</span></div>`).join("") + `</div>`;
+
+  const find = v.find.map((f,i)=>`<div class="find-item" data-find="${i}">
+      <div class="q">👀 ${vocab(f.q)}</div>
+      <button class="reveal">看答案</button>
+      <div class="a">💡 ${vocab(f.a)}</div>
+    </div>`).join("");
+
+  const equip = v.equip.map(e=>`<div class="equip-item">
+      <div class="en">${esc(e.name)}</div><div class="ed">${vocab(e.desc)}</div>
+    </div>`).join("");
+
+  const story = `<div class="story-title">${esc(v.story.title)}</div>
+    <div class="story-text">${esc(v.story.text)}</div>
+    <div class="story-tip">📖 唸給孩子聽，遇到聲音的地方演出來更好玩！</div>`;
+
+  const quiz = v.quiz.map((qz,qi)=>`<div class="quiz-item" data-quiz="${qi}">
+      <div class="qq">Q${qi+1}. ${esc(qz.q)}</div>
+      ${qz.opts.map((o,oi)=>`<button class="opt" data-oi="${oi}">${"ABC"[oi]}. ${esc(o)}</button>`).join("")}
+      <div class="quiz-why">🎉 ${esc(qz.why)}</div>
+    </div>`).join("");
+
+  const move = `<div class="move-box">${esc(v.move)}</div>`;
+  const talk = `<div class="talks">` + v.talk.map((t,i)=>`<div class="talk-item"><span class="n">${i+1}</span><span>${esc(t)}</span></div>`).join("") + `</div>`;
+
+  el("card").innerHTML = `
+    <img class="photo" src="${v.img}" alt="${esc(v.name)} 的照片">
+    <div class="head"><div class="name">${esc(v.name)}</div><div class="country">${esc(v.country)}</div></div>
+    ${sectionHTML("facts","🚗","認識它","2 分鐘",facts,true)}
+    ${sectionHTML("find","🔍","找一找","4 分鐘",find)}
+    ${sectionHTML("equip","🧩","厲害裝備","3 分鐘",equip)}
+    ${sectionHTML("story","📖","出任務囉！","4 分鐘",story)}
+    ${sectionHTML("quiz","❓","猜一猜","3 分鐘",quiz)}
+    ${sectionHTML("move","🤸","動一動","2 分鐘",move)}
+    ${sectionHTML("talk","💬","聊一聊","2 分鐘",talk)}
+  `;
+
+  el("next").disabled = offset >= 0 && dbg === null;
   el("prev").disabled = (dayNum <= 0);
   el("backtoday").style.display = offset < 0 ? "block" : "none";
 
@@ -344,35 +287,58 @@ function toast(msg){
 }
 function goPrev(){ if (todayNum + offset > 0) { offset--; render("prev"); } }
 function goNext(){
-  if (offset < 0) { offset++; render("next"); }
+  if (offset < 0 || dbg !== null) { offset++; render("next"); }
   else toast("明天才有新的車車唷 🤫");
 }
 el("prev").onclick = goPrev;
 el("next").onclick = goNext;
 el("backtoday").onclick = () => { offset = 0; render("next"); };
 
-/* 手指滑動（Pointer 事件：手機觸控與桌機拖曳都支援） */
+/* 手指滑動（Pointer 事件） */
 let sx = null, sy = null;
 const stage = el("stage");
 stage.addEventListener("pointerdown", e => { sx = e.clientX; sy = e.clientY; }, {passive:true});
 stage.addEventListener("pointerup", e => {
   if (sx === null) return;
-  const dx = e.clientX - sx;
-  const dy = e.clientY - sy;
+  const dx = e.clientX - sx, dy = e.clientY - sy;
   if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) { dx < 0 ? goNext() : goPrev(); }
   sx = sy = null;
 }, {passive:true});
 stage.addEventListener("pointercancel", () => { sx = sy = null; }, {passive:true});
 
-/* 詞彙彈出卡 */
+/* 事件代理：段落開合、找一找、猜一猜、詞彙 */
 document.addEventListener("click", e => {
-  const b = e.target.closest(".w");
-  if (!b) return;
-  const d = DICT[b.dataset.w];
-  el("s-emoji").textContent = d.emoji;
-  el("s-word").textContent = b.dataset.w;
-  el("s-desc").textContent = d.desc;
-  el("sheet-mask").classList.add("open");
+  const w = e.target.closest(".w");
+  if (w) {
+    const d = DICT[w.dataset.w];
+    el("s-emoji").textContent = d.emoji;
+    el("s-word").textContent = w.dataset.w;
+    el("s-desc").textContent = d.desc;
+    el("sheet-mask").classList.add("open");
+    return;
+  }
+  const sb = e.target.closest(".sec-btn");
+  if (sb) { sb.parentElement.classList.toggle("open"); return; }
+  const rv = e.target.closest(".reveal");
+  if (rv) { rv.closest(".find-item").classList.add("shown"); return; }
+  const opt = e.target.closest(".opt");
+  if (opt) {
+    const item = opt.closest(".quiz-item");
+    if (item.classList.contains("done")) return;
+    const dayNum = todayNum + offset;
+    const v = VEHICLES[idxOf(dayNum)];
+    const qz = v.quiz[+item.dataset.quiz];
+    if (+opt.dataset.oi === qz.ans) {
+      opt.classList.add("correct");
+      item.classList.add("done");
+      item.querySelectorAll(".opt").forEach(o=>{ if(o!==opt) o.style.opacity=.45; o.disabled=true; });
+    } else {
+      opt.classList.add("wrong");
+      toast("再猜猜看！");
+      setTimeout(()=>opt.classList.remove("wrong"), 500);
+    }
+    return;
+  }
 });
 el("s-close").onclick = () => el("sheet-mask").classList.remove("open");
 el("sheet-mask").addEventListener("click", e => { if (e.target === el("sheet-mask")) el("sheet-mask").classList.remove("open"); });
