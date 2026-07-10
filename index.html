@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#fff8ef">
+<title>今日車車 Today's Car</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:"Noto Sans TC","PingFang TC",sans-serif;
+  background:#fff8ef;
+  color:#3a3430;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.wrap { width:100%; max-width:560px; padding:20px 18px 40px; }
+
+/* 頁首 */
+.top { text-align:center; margin-bottom:14px; }
+.top .date { font-size:13px; letter-spacing:.18em; color:#a89880; }
+.top h1 { font-size:30px; font-weight:900; letter-spacing:.06em; margin-top:4px; }
+.top h1 .en { display:block; font-size:12px; font-weight:500; letter-spacing:.3em; color:#c4b49c; margin-top:2px; }
+
+/* 類別徽章 */
+.chip {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:14px; font-weight:700;
+  padding:6px 16px; border-radius:999px;
+  margin:10px auto 14px;
+}
+.chip.fire   { background:#ffe3d6; color:#c2472c; }
+.chip.amb    { background:#dff0e4; color:#2e7d4f; }
+.chip.police { background:#dde9f7; color:#2b5d9e; }
+
+/* 主卡片 */
+.card {
+  background:#ffffff;
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(120,90,50,.12);
+  animation:pop .5s cubic-bezier(.22,1,.36,1);
+}
+@keyframes pop { from { opacity:0; transform:translateY(16px) scale(.98);} to { opacity:1; transform:none;} }
+@media (prefers-reduced-motion: reduce){ .card{ animation:none } }
+.photo {
+  width:100%; aspect-ratio:4/3; object-fit:cover; display:block;
+  background:#f0e8dc;
+}
+.body { padding:22px 22px 24px; }
+.name { font-size:26px; font-weight:900; line-height:1.3; }
+.country { font-size:15px; color:#8d7f6d; margin-top:4px; }
+
+.facts { margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+.fact {
+  display:flex; gap:10px; align-items:flex-start;
+  font-size:16.5px; line-height:1.65;
+}
+.fact .dot { flex:none; margin-top:9px; width:8px; height:8px; border-radius:50%; background:#f0b429; }
+
+.talk {
+  margin-top:20px;
+  background:#fff3d6;
+  border-radius:16px;
+  padding:14px 16px;
+  font-size:15.5px; line-height:1.7;
+}
+.talk .t { font-size:12.5px; font-weight:700; letter-spacing:.14em; color:#b98a1e; margin-bottom:4px; }
+
+/* 昨天 */
+.yesterday {
+  margin-top:18px;
+  display:flex; align-items:center; gap:12px;
+  background:#ffffff; border-radius:16px; padding:10px 14px;
+  box-shadow:0 4px 14px rgba(120,90,50,.08);
+  text-decoration:none; color:inherit;
+}
+.yesterday img { width:64px; height:48px; object-fit:cover; border-radius:10px; background:#f0e8dc; }
+.yesterday .y-label { font-size:11.5px; letter-spacing:.16em; color:#a89880; }
+.yesterday .y-name { font-size:15px; font-weight:700; margin-top:2px; }
+
+/* 頁尾 */
+.foot { margin-top:26px; text-align:center; font-size:11.5px; color:#b3a48d; line-height:1.9; }
+.foot a { color:inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="date" id="today-date"></div>
+    <h1>今日車車<span class="en">TODAY'S CAR</span></h1>
+    <div id="chip"></div>
+  </header>
+
+  <main class="card" id="card">
+    <img class="photo" id="photo" alt="今天的車車照片">
+    <div class="body">
+      <div class="name" id="name"></div>
+      <div class="country" id="country"></div>
+      <div class="facts" id="facts"></div>
+      <div class="talk"><div class="t">跟爸爸媽媽聊一聊</div><div id="talk"></div></div>
+    </div>
+  </main>
+
+  <div class="yesterday" id="yesterday" style="display:none">
+    <img id="y-img" alt="昨天的車車">
+    <div><div class="y-label">昨天的車車</div><div class="y-name" id="y-name"></div></div>
+  </div>
+
+  <footer class="foot">
+    每天早上自動換一台新的車車 🚗<br>
+    照片來自 <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a>（<span id="license"></span>）
+  </footer>
+</div>
+
+<script>
+const CATS = {
+  fire:   { label:"消防車", emoji:"🚒", cls:"fire" },
+  amb:    { label:"救護車", emoji:"🚑", cls:"amb" },
+  police: { label:"警車",   emoji:"🚓", cls:"police" }
+};
+
+/* 內容庫：消防→救護→警車 每日輪流 */
+const VEHICLES = [
+{ cat:"fire", name:"機場消防車「黑豹」", country:"🇭🇺 匈牙利・布達佩斯機場",
+  facts:["專門保護飛機的超大消防車，有六個大輪子","水砲像超級水槍，可以射得比操場還遠","引擎超有力，幾十秒就能衝到失火的飛機旁邊"],
+  talk:"為什麼機場要有自己的消防車呢？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Airport_crash_tender_-_Rosenbauer_Panther_-_Airport_Budapest_%289437%29.jpg/1280px-Airport_crash_tender_-_Rosenbauer_Panther_-_Airport_Budapest_%289437%29.jpg",
+  license:"CC BY-SA 4.0" },
+{ cat:"amb", name:"高規格救護車", country:"🇯🇵 日本設計",
+  facts:["車廂特別高，醫護人員可以站著照顧病人","裡面就像一間小小的醫院","開起來很平穩，躺著的病人不會晃來晃去"],
+  talk:"你猜救護車裡面放了哪些東西？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Toyota_Himedic_ambulance%2C_Bangladesh._%2833158014821%29.jpg/1280px-Toyota_Himedic_ambulance%2C_Bangladesh._%2833158014821%29.jpg",
+  license:"CC BY-SA 2.0" },
+{ cat:"police", name:"日本警車「皇冠」", country:"🇯🇵 日本",
+  facts:["黑色配白色，看起來很神氣","車頂有紅色的燈，會轉圈圈發光","日本人叫警車「趴斗卡」（パトカー）"],
+  talk:"台灣的警車長什麼樣子？下次在路上找找看！",
+  img:"https://upload.wikimedia.org/wikipedia/commons/2/23/TOYOTA_CROWN_Police_Car_2007-06.jpg",
+  license:"CC BY-SA 2.5" },
+{ cat:"fire", name:"地震體驗車", country:"🇯🇵 日本・東京",
+  facts:["這台車不滅火——它會「製造地震」！","車上有個小房間會搖來搖去，讓大家練習地震來了怎麼辦","日本地震很多，所以發明了這台特別的車"],
+  talk:"地震來的時候，我們家要躲在哪裡？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Jishin-Taikensha_experience_of_an_Artificial_Earthquake_in_2009_Tokyo.jpg/1280px-Jishin-Taikensha_experience_of_an_Artificial_Earthquake_in_2009_Tokyo.jpg",
+  license:"CC BY 2.0" },
+{ cat:"amb", name:"古董救護車爺爺", country:"🇺🇸 美國・50 年前",
+  facts:["這是 50 年前的救護車，像卡車一樣壯","以前的救護車長這樣，跟現在很不一樣","它已經退休了，現在的工作是讓大家認識歷史"],
+  talk:"車車退休以後，會去哪裡呢？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/1976_Chevrolet_C-30_Springfield_Type_I_Ambulance_of_the_PGFD.jpg/1280px-1976_Chevrolet_C-30_Springfield_Type_I_Ambulance_of_the_PGFD.jpg",
+  license:"Public domain" },
+{ cat:"police", name:"洛杉磯追風警車", country:"🇺🇸 美國・洛杉磯",
+  facts:["引擎聲音超級大聲，跑得超級快","車頂的燈會閃紅色和藍色","壞人開再快，也跑不過它"],
+  talk:"警察為什麼需要跑很快的車？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/LAPD_Dodge_charger_%28lights%29.jpg/1280px-LAPD_Dodge_charger_%28lights%29.jpg",
+  license:"Public domain" },
+{ cat:"fire", name:"雲梯消防車", country:"🇩🇪 德國",
+  facts:["車上有一座會伸長的梯子，可以升到 10 層樓高","梯子前面有個小籃子，消防員站在裡面救人","不用的時候，梯子會摺起來趴在車頂睡覺"],
+  talk:"為什麼消防車需要這麼長的梯子？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/IVECO_MAGIRUS_160E30_Drehleiter.jpg/1280px-IVECO_MAGIRUS_160E30_Drehleiter.jpg",
+  license:"CC BY-SA 4.0" },
+{ cat:"amb", name:"賓士救護車", country:"🇩🇪 德國",
+  facts:["德國的救護車是黃色配紅色，跟台灣的不一樣","車身高高方方的，裡面裝滿救人的工具","德國人叫它「救援車」"],
+  talk:"台灣的救護車是什麼顏色的？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Rettungswagen_BRK_Sprinter-20180805-RM-173219.jpg/1280px-Rettungswagen_BRK_Sprinter-20180805-RM-173219.jpg",
+  license:"CC BY-SA 4.0" },
+{ cat:"police", name:"德國警車", country:"🇩🇪 德國・慕尼黑",
+  facts:["藍色配銀色，是德國警車的制服","車身上的「POLIZEI」就是德文的「警察」","這台正在大教堂旁邊站崗"],
+  talk:"為什麼每個國家的警車顏色都不一樣？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M%C3%BCnchen-_Innenstadt_%28bei_Frauenkirche%29-_Streifenwagen_der_Polizei_Bayern_%28BMW_M-PM-9036%29_1.4.2010.jpg/1280px-M%C3%BCnchen-_Innenstadt_%28bei_Frauenkirche%29-_Streifenwagen_der_Polizei_Bayern_%28BMW_M-PM-9036%29_1.4.2010.jpg",
+  license:"CC BY-SA 3.0" },
+{ cat:"fire", name:"美國大紅消防車", country:"🇺🇸 美國",
+  facts:["美國的消防車又大又長，車頭亮晶晶","它像一顆超強的心臟，把水用力打出去","鮮紅色的車身，遠遠就看得到"],
+  talk:"消防車的水是從哪裡來的？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Hamden_Fire_Engine_1%2C_Pierce_Dash_pumper_%2854539800778%29.jpg/1280px-Hamden_Fire_Engine_1%2C_Pierce_Dash_pumper_%2854539800778%29.jpg",
+  license:"CC BY-SA 2.0" },
+{ cat:"amb", name:"救護腳踏車", country:"🇬🇧 英國・倫敦",
+  facts:["沒看錯——腳踏車也可以當救護車！","人很多、汽車擠不進去的地方，救護員就騎車衝過去","後面的袋子裡裝著急救工具"],
+  talk:"還有什麼地方是汽車進不去、腳踏車進得去的？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/4/4f/London_Ambulance_-_NHS_Ambulance_bicycle_-_geograph.org.uk_-_5130875.jpg",
+  license:"CC BY-SA 2.0" },
+{ cat:"police", name:"藍寶堅尼警車", country:"🇮🇹 義大利",
+  facts:["超級跑車當警車，全世界最快的警車之一","它有一個特別任務：快速運送救命的醫療物品","全義大利只有幾台，超級稀有"],
+  talk:"如果你是警察，你最想開哪一台車？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/0/03/Lamborghini_Gallardo_Lp560_of_the_Polizia_di_Stato_%28front_view%29.jpg",
+  license:"CC BY-SA 3.0" },
+{ cat:"fire", name:"爬山小消防車", country:"🇨🇭 瑞士",
+  facts:["這台小消防車專門爬山路","大消防車進不去的小巷子，它都鑽得進去","它住在瑞士的山上，保護山裡的房子"],
+  talk:"為什麼山上需要小台一點的消防車？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Unimog_U_402_Feuerwehr_Klosters_Bild_1.jpg/1280px-Unimog_U_402_Feuerwehr_Klosters_Bild_1.jpg",
+  license:"Public domain" },
+{ cat:"amb", name:"救護摩托車", country:"🇭🇰 香港",
+  facts:["塞車的時候，摩托車救護員可以鑽來鑽去先趕到","先到的救護員先幫忙病人，等大救護車來","車尾的箱子裝滿了急救工具"],
+  talk:"為什麼摩托車可以比汽車先到？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Motorcycle_paramedic_on_Nathan_Road_in_Jordan%2C_Hong_Kong.jpg/1280px-Motorcycle_paramedic_on_Nathan_Road_in_Jordan%2C_Hong_Kong.jpg",
+  license:"CC BY-SA 4.0" },
+{ cat:"police", name:"英國格子蛋糕警車", country:"🇬🇧 英國・曼徹斯特",
+  facts:["車身上有黃藍格子，名字真的叫「巴騰堡格紋」——跟一種格子蛋糕同名！","不管白天晚上，格子都超顯眼","遠遠看到格子，就知道警察來幫忙了"],
+  talk:"為什麼警車要穿這麼顯眼的衣服？",
+  img:"https://upload.wikimedia.org/wikipedia/commons/7/76/Greater_Manchester_Police_car_in_2003_livery%2C_14_June_2008.jpg",
+  license:"CC BY-SA 2.0" }
+];
+
+/* 以台北時間換算「今天是第幾天」，每天自動換車 */
+const EPOCH = "2026-07-10"; // 第 0 天
+function taipeiDateStr(offset = 0) {
+  const now = new Date(Date.now() + offset * 86400000);
+  return now.toLocaleDateString("en-CA", { timeZone: "Asia/Taipei" });
+}
+function dayIndex(dateStr) {
+  const d = (new Date(dateStr) - new Date(EPOCH)) / 86400000;
+  return ((Math.round(d) % VEHICLES.length) + VEHICLES.length) % VEHICLES.length;
+}
+
+/* ?d=N 可以預覽第 N 天（測試用） */
+const dbg = new URLSearchParams(location.search).get("d");
+const todayStr = taipeiDateStr(0);
+const idxToday = dbg !== null ? ((+dbg % VEHICLES.length) + VEHICLES.length) % VEHICLES.length : dayIndex(todayStr);
+const idxYest  = (idxToday - 1 + VEHICLES.length) % VEHICLES.length;
+
+const v = VEHICLES[idxToday];
+const cat = CATS[v.cat];
+const [y, m, d] = todayStr.split("-");
+const week = ["日","一","二","三","四","五","六"][new Date(todayStr).getDay()];
+document.getElementById("today-date").textContent = `${y} 年 ${+m} 月 ${+d} 日・星期${week}`;
+document.getElementById("chip").innerHTML = `<span class="chip ${cat.cls}">${cat.emoji} 今天是${cat.label}日</span>`;
+document.getElementById("photo").src = v.img;
+document.getElementById("name").textContent = v.name;
+document.getElementById("country").textContent = v.country;
+document.getElementById("facts").innerHTML = v.facts.map(f => `<div class="fact"><span class="dot"></span><span>${f}</span></div>`).join("");
+document.getElementById("talk").textContent = v.talk;
+document.getElementById("license").textContent = v.license;
+document.title = `今日車車 ${cat.emoji} ${v.name}`;
+
+/* 昨天的車車（第 0 天不顯示） */
+if (dbg !== null || todayStr !== EPOCH) {
+  const yv = VEHICLES[idxYest];
+  document.getElementById("yesterday").style.display = "flex";
+  document.getElementById("y-img").src = yv.img;
+  document.getElementById("y-name").textContent = `${CATS[yv.cat].emoji} ${yv.name}`;
+}
+</script>
+</body>
+</html>
