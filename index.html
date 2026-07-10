@@ -7,6 +7,7 @@
 <title>今日車車 Today's Car</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
 body {
   font-family:"Noto Sans TC","PingFang TC",sans-serif;
   background:#fff8ef;
@@ -15,6 +16,7 @@ body {
   display:flex;
   flex-direction:column;
   align-items:center;
+  overflow-x:hidden;
 }
 .wrap { width:100%; max-width:560px; padding:20px 18px 40px; }
 
@@ -35,16 +37,19 @@ body {
 .chip.amb    { background:#dff0e4; color:#2e7d4f; }
 .chip.police { background:#dde9f7; color:#2b5d9e; }
 
-/* 主卡片 */
+/* 主卡片 + 滑動 */
+.stage { position:relative; touch-action:pan-y; }
 .card {
   background:#ffffff;
   border-radius:24px;
   overflow:hidden;
   box-shadow:0 10px 30px rgba(120,90,50,.12);
-  animation:pop .5s cubic-bezier(.22,1,.36,1);
 }
-@keyframes pop { from { opacity:0; transform:translateY(16px) scale(.98);} to { opacity:1; transform:none;} }
-@media (prefers-reduced-motion: reduce){ .card{ animation:none } }
+.card.slide-in-left  { animation:inL .32s cubic-bezier(.22,1,.36,1); }
+.card.slide-in-right { animation:inR .32s cubic-bezier(.22,1,.36,1); }
+@keyframes inL { from { opacity:0; transform:translateX(40px);} to { opacity:1; transform:none;} }
+@keyframes inR { from { opacity:0; transform:translateX(-40px);} to { opacity:1; transform:none;} }
+@media (prefers-reduced-motion: reduce){ .card{ animation:none !important } }
 .photo {
   width:100%; aspect-ratio:4/3; object-fit:cover; display:block;
   background:#f0e8dc;
@@ -60,6 +65,15 @@ body {
 }
 .fact .dot { flex:none; margin-top:9px; width:8px; height:8px; border-radius:50%; background:#f0b429; }
 
+/* 可點的詞彙 */
+.w {
+  font:inherit; border:none; cursor:pointer;
+  background:#fff3d6; color:#8a5b13; font-weight:700;
+  border-bottom:2px dashed #e0a93e;
+  padding:0 3px; border-radius:6px 6px 0 0;
+}
+.w:active { background:#ffe7ae; }
+
 .talk {
   margin-top:20px;
   background:#fff3d6;
@@ -69,17 +83,58 @@ body {
 }
 .talk .t { font-size:12.5px; font-weight:700; letter-spacing:.14em; color:#b98a1e; margin-bottom:4px; }
 
-/* 昨天 */
-.yesterday {
-  margin-top:18px;
-  display:flex; align-items:center; gap:12px;
-  background:#ffffff; border-radius:16px; padding:10px 14px;
-  box-shadow:0 4px 14px rgba(120,90,50,.08);
-  text-decoration:none; color:inherit;
+/* 導覽（滑動提示 + 桌機箭頭） */
+.nav {
+  margin-top:16px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
 }
-.yesterday img { width:64px; height:48px; object-fit:cover; border-radius:10px; background:#f0e8dc; }
-.yesterday .y-label { font-size:11.5px; letter-spacing:.16em; color:#a89880; }
-.yesterday .y-name { font-size:15px; font-weight:700; margin-top:2px; }
+.nav button {
+  border:none; cursor:pointer;
+  background:#ffffff; color:#8d7f6d;
+  font-size:15px; font-weight:700;
+  padding:10px 18px; border-radius:999px;
+  box-shadow:0 4px 14px rgba(120,90,50,.1);
+  font-family:inherit;
+}
+.nav button:disabled { opacity:.35; cursor:default; }
+.nav .hint { font-size:12px; color:#c4b49c; letter-spacing:.08em; text-align:center; flex:1; }
+.backtoday {
+  display:none; margin:14px auto 0;
+  border:none; cursor:pointer; font-family:inherit;
+  background:#3a3430; color:#fff8ef; font-size:14px; font-weight:700;
+  padding:10px 22px; border-radius:999px;
+}
+
+/* 詞彙彈出卡 */
+.sheet-mask {
+  position:fixed; inset:0; background:rgba(58,52,48,.45);
+  display:none; align-items:flex-end; justify-content:center; z-index:50;
+}
+.sheet-mask.open { display:flex; }
+.sheet {
+  width:100%; max-width:560px;
+  background:#fffdf8; border-radius:24px 24px 0 0;
+  padding:28px 24px 40px; text-align:center;
+  animation:up .28s cubic-bezier(.22,1,.36,1);
+}
+@keyframes up { from { transform:translateY(40px); opacity:0 } to { transform:none; opacity:1 } }
+.sheet .big { font-size:64px; line-height:1.2; }
+.sheet .word { font-size:24px; font-weight:900; margin-top:8px; }
+.sheet .desc { font-size:16.5px; line-height:1.8; color:#5c554e; margin-top:8px; }
+.sheet .close {
+  margin-top:18px; border:none; cursor:pointer; font-family:inherit;
+  background:#f0e8dc; color:#5c554e; font-size:15px; font-weight:700;
+  padding:10px 28px; border-radius:999px;
+}
+
+/* 小提示氣泡 */
+#toast {
+  position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px);
+  background:#3a3430; color:#fff8ef;
+  font-size:14.5px; padding:10px 20px; border-radius:999px;
+  opacity:0; pointer-events:none; transition:.25s; z-index:60; white-space:nowrap;
+}
+#toast.show { opacity:1; transform:translateX(-50%); }
 
 /* 頁尾 */
 .foot { margin-top:26px; text-align:center; font-size:11.5px; color:#b3a48d; line-height:1.9; }
@@ -94,26 +149,40 @@ body {
     <div id="chip"></div>
   </header>
 
-  <main class="card" id="card">
-    <img class="photo" id="photo" alt="今天的車車照片">
-    <div class="body">
-      <div class="name" id="name"></div>
-      <div class="country" id="country"></div>
-      <div class="facts" id="facts"></div>
-      <div class="talk"><div class="t">跟爸爸媽媽聊一聊</div><div id="talk"></div></div>
-    </div>
-  </main>
-
-  <div class="yesterday" id="yesterday" style="display:none">
-    <img id="y-img" alt="昨天的車車">
-    <div><div class="y-label">昨天的車車</div><div class="y-name" id="y-name"></div></div>
+  <div class="stage" id="stage">
+    <main class="card" id="card">
+      <img class="photo" id="photo" alt="今天的車車照片">
+      <div class="body">
+        <div class="name" id="name"></div>
+        <div class="country" id="country"></div>
+        <div class="facts" id="facts"></div>
+        <div class="talk"><div class="t">跟爸爸媽媽聊一聊</div><div id="talk"></div></div>
+      </div>
+    </main>
   </div>
 
+  <div class="nav">
+    <button id="prev">‹ 前一天</button>
+    <div class="hint">左右滑動也可以換車唷</div>
+    <button id="next">後一天 ›</button>
+  </div>
+  <button class="backtoday" id="backtoday">回到今天 🚗</button>
+
   <footer class="foot">
-    每天早上自動換一台新的車車 🚗<br>
+    每天早上自動換一台新的車車 🚗 有黃色虛線的詞可以按按看！<br>
     照片來自 <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a>（<span id="license"></span>）
   </footer>
 </div>
+
+<div class="sheet-mask" id="sheet-mask">
+  <div class="sheet">
+    <div class="big" id="s-emoji"></div>
+    <div class="word" id="s-word"></div>
+    <div class="desc" id="s-desc"></div>
+    <button class="close" id="s-close">知道了！</button>
+  </div>
+</div>
+<div id="toast"></div>
 
 <script>
 const CATS = {
@@ -122,50 +191,67 @@ const CATS = {
   police: { label:"警車",   emoji:"🚓", cls:"police" }
 };
 
+/* 詞彙小字典：facts 裡用 [[詞]] 標記，按了會跳出說明 */
+const DICT = {
+  "水砲":   { emoji:"💦", desc:"裝在消防車上的超大水槍，可以把水噴得又高又遠。" },
+  "引擎":   { emoji:"⚙️", desc:"車車的心臟！它一動起來，車車才有力氣跑。" },
+  "醫護人員":{ emoji:"🧑‍⚕️", desc:"在救護車上照顧病人的人，會打針、包紮、量心跳。" },
+  "地震":   { emoji:"🫨", desc:"地面突然搖來搖去。記得：躲桌下、護頭頭、不搭電梯。" },
+  "古董":   { emoji:"🏺", desc:"很老很老、有很多故事的寶貝東西。" },
+  "雲梯":   { emoji:"🪜", desc:"會伸得很～長很～長的梯子，高得好像可以碰到雲，所以叫雲梯。" },
+  "急救工具":{ emoji:"🧰", desc:"救人用的百寶箱：繃帶、OK 繃、剪刀、手套都在裡面。" },
+  "站崗":   { emoji:"💂", desc:"站在一個地方守護大家，眼睛要張得大大的。" },
+  "救護員": { emoji:"🚑", desc:"第一個趕到現場幫忙受傷的人的人，跑得超快。" },
+  "醫療物品":{ emoji:"🩹", desc:"救人的東西，像急救箱、OK 繃、繃帶、藥藥。" },
+  "超級跑車":{ emoji:"🏎️", desc:"跑得非常非常快的車，車身低低的、聲音轟隆隆。" },
+  "巴騰堡格紋":{ emoji:"🍰", desc:"黃色配藍色的格子花紋，名字跟一種格子蛋糕一樣，超顯眼！" },
+  "警示燈": { emoji:"🚨", desc:"車頂上會閃會轉的燈，亮起來就是在說「讓一讓，我去幫忙了！」" }
+};
+
 /* 內容庫：消防→救護→警車 每日輪流 */
 const VEHICLES = [
 { cat:"fire", name:"機場消防車「黑豹」", country:"🇭🇺 匈牙利・布達佩斯機場",
-  facts:["專門保護飛機的超大消防車，有六個大輪子","水砲像超級水槍，可以射得比操場還遠","引擎超有力，幾十秒就能衝到失火的飛機旁邊"],
+  facts:["專門保護飛機的超大消防車，有六個大輪子","[[水砲]]像超級水槍，可以射得比操場還遠","[[引擎]]超有力，幾十秒就能衝到失火的飛機旁邊"],
   talk:"為什麼機場要有自己的消防車呢？",
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Airport_crash_tender_-_Rosenbauer_Panther_-_Airport_Budapest_%289437%29.jpg/1280px-Airport_crash_tender_-_Rosenbauer_Panther_-_Airport_Budapest_%289437%29.jpg",
   license:"CC BY-SA 4.0" },
 { cat:"amb", name:"高規格救護車", country:"🇯🇵 日本設計",
-  facts:["車廂特別高，醫護人員可以站著照顧病人","裡面就像一間小小的醫院","開起來很平穩，躺著的病人不會晃來晃去"],
+  facts:["車廂特別高，[[醫護人員]]可以站著照顧病人","裡面就像一間小小的醫院","開起來很平穩，躺著的病人不會晃來晃去"],
   talk:"你猜救護車裡面放了哪些東西？",
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Toyota_Himedic_ambulance%2C_Bangladesh._%2833158014821%29.jpg/1280px-Toyota_Himedic_ambulance%2C_Bangladesh._%2833158014821%29.jpg",
   license:"CC BY-SA 2.0" },
 { cat:"police", name:"日本警車「皇冠」", country:"🇯🇵 日本",
-  facts:["黑色配白色，看起來很神氣","車頂有紅色的燈，會轉圈圈發光","日本人叫警車「趴斗卡」（パトカー）"],
+  facts:["黑色配白色，看起來很神氣","車頂有紅色的[[警示燈]]，會轉圈圈發光","日本人叫警車「趴斗卡」（パトカー）"],
   talk:"台灣的警車長什麼樣子？下次在路上找找看！",
   img:"https://upload.wikimedia.org/wikipedia/commons/2/23/TOYOTA_CROWN_Police_Car_2007-06.jpg",
   license:"CC BY-SA 2.5" },
 { cat:"fire", name:"地震體驗車", country:"🇯🇵 日本・東京",
-  facts:["這台車不滅火——它會「製造地震」！","車上有個小房間會搖來搖去，讓大家練習地震來了怎麼辦","日本地震很多，所以發明了這台特別的車"],
+  facts:["這台車不滅火——它會「製造[[地震]]」！","車上有個小房間會搖來搖去，讓大家練習地震來了怎麼辦","日本地震很多，所以發明了這台特別的車"],
   talk:"地震來的時候，我們家要躲在哪裡？",
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Jishin-Taikensha_experience_of_an_Artificial_Earthquake_in_2009_Tokyo.jpg/1280px-Jishin-Taikensha_experience_of_an_Artificial_Earthquake_in_2009_Tokyo.jpg",
   license:"CC BY 2.0" },
 { cat:"amb", name:"古董救護車爺爺", country:"🇺🇸 美國・50 年前",
-  facts:["這是 50 年前的救護車，像卡車一樣壯","以前的救護車長這樣，跟現在很不一樣","它已經退休了，現在的工作是讓大家認識歷史"],
+  facts:["這是 50 年前的救護車，像卡車一樣壯","以前的救護車長這樣，跟現在很不一樣","它是[[古董]]，現在的工作是讓大家認識歷史"],
   talk:"車車退休以後，會去哪裡呢？",
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/1976_Chevrolet_C-30_Springfield_Type_I_Ambulance_of_the_PGFD.jpg/1280px-1976_Chevrolet_C-30_Springfield_Type_I_Ambulance_of_the_PGFD.jpg",
   license:"Public domain" },
 { cat:"police", name:"洛杉磯追風警車", country:"🇺🇸 美國・洛杉磯",
-  facts:["引擎聲音超級大聲，跑得超級快","車頂的燈會閃紅色和藍色","壞人開再快，也跑不過它"],
+  facts:["[[引擎]]聲音超級大聲，跑得超級快","車頂的[[警示燈]]會閃紅色和藍色","壞人開再快，也跑不過它"],
   talk:"警察為什麼需要跑很快的車？",
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/LAPD_Dodge_charger_%28lights%29.jpg/1280px-LAPD_Dodge_charger_%28lights%29.jpg",
   license:"Public domain" },
 { cat:"fire", name:"雲梯消防車", country:"🇩🇪 德國",
-  facts:["車上有一座會伸長的梯子，可以升到 10 層樓高","梯子前面有個小籃子，消防員站在裡面救人","不用的時候，梯子會摺起來趴在車頂睡覺"],
+  facts:["車上的[[雲梯]]可以升到 10 層樓那麼高","梯子前面有個小籃子，消防員站在裡面救人","不用的時候，梯子會摺起來趴在車頂睡覺"],
   talk:"為什麼消防車需要這麼長的梯子？",
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/IVECO_MAGIRUS_160E30_Drehleiter.jpg/1280px-IVECO_MAGIRUS_160E30_Drehleiter.jpg",
   license:"CC BY-SA 4.0" },
 { cat:"amb", name:"賓士救護車", country:"🇩🇪 德國",
-  facts:["德國的救護車是黃色配紅色，跟台灣的不一樣","車身高高方方的，裡面裝滿救人的工具","德國人叫它「救援車」"],
+  facts:["德國的救護車是黃色配紅色，跟台灣的不一樣","車身高高方方的，裝滿了[[急救工具]]","德國人叫它「救援車」"],
   talk:"台灣的救護車是什麼顏色的？",
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Rettungswagen_BRK_Sprinter-20180805-RM-173219.jpg/1280px-Rettungswagen_BRK_Sprinter-20180805-RM-173219.jpg",
   license:"CC BY-SA 4.0" },
 { cat:"police", name:"德國警車", country:"🇩🇪 德國・慕尼黑",
-  facts:["藍色配銀色，是德國警車的制服","車身上的「POLIZEI」就是德文的「警察」","這台正在大教堂旁邊站崗"],
+  facts:["藍色配銀色，是德國警車的制服","車身上的「POLIZEI」就是德文的「警察」","這台正在大教堂旁邊[[站崗]]"],
   talk:"為什麼每個國家的警車顏色都不一樣？",
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M%C3%BCnchen-_Innenstadt_%28bei_Frauenkirche%29-_Streifenwagen_der_Polizei_Bayern_%28BMW_M-PM-9036%29_1.4.2010.jpg/1280px-M%C3%BCnchen-_Innenstadt_%28bei_Frauenkirche%29-_Streifenwagen_der_Polizei_Bayern_%28BMW_M-PM-9036%29_1.4.2010.jpg",
   license:"CC BY-SA 3.0" },
@@ -175,12 +261,12 @@ const VEHICLES = [
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Hamden_Fire_Engine_1%2C_Pierce_Dash_pumper_%2854539800778%29.jpg/1280px-Hamden_Fire_Engine_1%2C_Pierce_Dash_pumper_%2854539800778%29.jpg",
   license:"CC BY-SA 2.0" },
 { cat:"amb", name:"救護腳踏車", country:"🇬🇧 英國・倫敦",
-  facts:["沒看錯——腳踏車也可以當救護車！","人很多、汽車擠不進去的地方，救護員就騎車衝過去","後面的袋子裡裝著急救工具"],
+  facts:["沒看錯——腳踏車也可以當救護車！","人很多、汽車擠不進去的地方，[[救護員]]就騎車衝過去","後面的袋子裡裝著[[急救工具]]"],
   talk:"還有什麼地方是汽車進不去、腳踏車進得去的？",
   img:"https://upload.wikimedia.org/wikipedia/commons/4/4f/London_Ambulance_-_NHS_Ambulance_bicycle_-_geograph.org.uk_-_5130875.jpg",
   license:"CC BY-SA 2.0" },
 { cat:"police", name:"藍寶堅尼警車", country:"🇮🇹 義大利",
-  facts:["超級跑車當警車，全世界最快的警車之一","它有一個特別任務：快速運送救命的醫療物品","全義大利只有幾台，超級稀有"],
+  facts:["[[超級跑車]]當警車，全世界最快的警車之一","它有一個特別任務：快速運送救命的[[醫療物品]]","全義大利只有幾台，超級稀有"],
   talk:"如果你是警察，你最想開哪一台車？",
   img:"https://upload.wikimedia.org/wikipedia/commons/0/03/Lamborghini_Gallardo_Lp560_of_the_Polizia_di_Stato_%28front_view%29.jpg",
   license:"CC BY-SA 3.0" },
@@ -190,55 +276,108 @@ const VEHICLES = [
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Unimog_U_402_Feuerwehr_Klosters_Bild_1.jpg/1280px-Unimog_U_402_Feuerwehr_Klosters_Bild_1.jpg",
   license:"Public domain" },
 { cat:"amb", name:"救護摩托車", country:"🇭🇰 香港",
-  facts:["塞車的時候，摩托車救護員可以鑽來鑽去先趕到","先到的救護員先幫忙病人，等大救護車來","車尾的箱子裝滿了急救工具"],
+  facts:["塞車的時候，摩托車[[救護員]]可以鑽來鑽去先趕到","先到的救護員先幫忙病人，等大救護車來","車尾的箱子裝滿了[[急救工具]]"],
   talk:"為什麼摩托車可以比汽車先到？",
   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Motorcycle_paramedic_on_Nathan_Road_in_Jordan%2C_Hong_Kong.jpg/1280px-Motorcycle_paramedic_on_Nathan_Road_in_Jordan%2C_Hong_Kong.jpg",
   license:"CC BY-SA 4.0" },
 { cat:"police", name:"英國格子蛋糕警車", country:"🇬🇧 英國・曼徹斯特",
-  facts:["車身上有黃藍格子，名字真的叫「巴騰堡格紋」——跟一種格子蛋糕同名！","不管白天晚上，格子都超顯眼","遠遠看到格子，就知道警察來幫忙了"],
+  facts:["車身上的黃藍格子叫[[巴騰堡格紋]]——跟一種格子蛋糕同名！","不管白天晚上，格子都超顯眼","遠遠看到格子，就知道警察來幫忙了"],
   talk:"為什麼警車要穿這麼顯眼的衣服？",
   img:"https://upload.wikimedia.org/wikipedia/commons/7/76/Greater_Manchester_Police_car_in_2003_livery%2C_14_June_2008.jpg",
   license:"CC BY-SA 2.0" }
 ];
 
-/* 以台北時間換算「今天是第幾天」，每天自動換車 */
+/* ── 日期邏輯：以台北時間為準，每天自動換車 ── */
 const EPOCH = "2026-07-10"; // 第 0 天
-function taipeiDateStr(offset = 0) {
-  const now = new Date(Date.now() + offset * 86400000);
-  return now.toLocaleDateString("en-CA", { timeZone: "Asia/Taipei" });
+function taipeiToday() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Taipei" });
 }
-function dayIndex(dateStr) {
-  const d = (new Date(dateStr) - new Date(EPOCH)) / 86400000;
-  return ((Math.round(d) % VEHICLES.length) + VEHICLES.length) % VEHICLES.length;
-}
-
-/* ?d=N 可以預覽第 N 天（測試用） */
+const todayStr = taipeiToday();
+const todayNum = Math.round((new Date(todayStr) - new Date(EPOCH)) / 86400000); // 今天是第幾天
 const dbg = new URLSearchParams(location.search).get("d");
-const todayStr = taipeiDateStr(0);
-const idxToday = dbg !== null ? ((+dbg % VEHICLES.length) + VEHICLES.length) % VEHICLES.length : dayIndex(todayStr);
-const idxYest  = (idxToday - 1 + VEHICLES.length) % VEHICLES.length;
 
-const v = VEHICLES[idxToday];
-const cat = CATS[v.cat];
-const [y, m, d] = todayStr.split("-");
-const week = ["日","一","二","三","四","五","六"][new Date(todayStr).getDay()];
-document.getElementById("today-date").textContent = `${y} 年 ${+m} 月 ${+d} 日・星期${week}`;
-document.getElementById("chip").innerHTML = `<span class="chip ${cat.cls}">${cat.emoji} 今天是${cat.label}日</span>`;
-document.getElementById("photo").src = v.img;
-document.getElementById("name").textContent = v.name;
-document.getElementById("country").textContent = v.country;
-document.getElementById("facts").innerHTML = v.facts.map(f => `<div class="fact"><span class="dot"></span><span>${f}</span></div>`).join("");
-document.getElementById("talk").textContent = v.talk;
-document.getElementById("license").textContent = v.license;
-document.title = `今日車車 ${cat.emoji} ${v.name}`;
+let offset = 0; // 0=今天，-1=昨天…（不能看未來）
+if (dbg !== null) offset = (+dbg) - todayNum; // ?d=N 直接跳到第 N 天（測試用）
 
-/* 昨天的車車（第 0 天不顯示） */
-if (dbg !== null || todayStr !== EPOCH) {
-  const yv = VEHICLES[idxYest];
-  document.getElementById("yesterday").style.display = "flex";
-  document.getElementById("y-img").src = yv.img;
-  document.getElementById("y-name").textContent = `${CATS[yv.cat].emoji} ${yv.name}`;
+function idxOf(dayNum) { return ((dayNum % VEHICLES.length) + VEHICLES.length) % VEHICLES.length; }
+
+const el = id => document.getElementById(id);
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function renderFacts(facts){
+  return facts.map(f=>{
+    const html = esc(f).replace(/\[\[(.+?)\]\]/g, (_,w)=> DICT[w] ? `<button class="w" data-w="${w}">${w}</button>` : w);
+    return `<div class="fact"><span class="dot"></span><span>${html}</span></div>`;
+  }).join("");
 }
+
+function render(dir) {
+  const dayNum = todayNum + offset;
+  const v = VEHICLES[idxOf(dayNum)];
+  const cat = CATS[v.cat];
+  const dateObj = new Date(new Date(EPOCH).getTime() + dayNum * 86400000);
+  const ds = dateObj.toLocaleDateString("en-CA");
+  const [y,m,d] = ds.split("-");
+  const week = ["日","一","二","三","四","五","六"][dateObj.getDay()];
+
+  el("today-date").textContent = `${y} 年 ${+m} 月 ${+d} 日・星期${week}` + (offset === 0 ? "" : offset === -1 ? "（昨天）" : `（${-offset} 天前）`);
+  el("chip").innerHTML = `<span class="chip ${cat.cls}">${cat.emoji} ${offset===0?"今天是":"這天是"}${cat.label}日</span>`;
+  el("photo").src = v.img;
+  el("name").textContent = v.name;
+  el("country").textContent = v.country;
+  el("facts").innerHTML = renderFacts(v.facts);
+  el("talk").textContent = v.talk;
+  el("license").textContent = v.license;
+  document.title = `今日車車 ${cat.emoji} ${v.name}`;
+
+  el("next").disabled = offset >= 0;
+  el("prev").disabled = (dayNum <= 0);
+  el("backtoday").style.display = offset < 0 ? "block" : "none";
+
+  const card = el("card");
+  card.classList.remove("slide-in-left","slide-in-right");
+  if (dir) { void card.offsetWidth; card.classList.add(dir === "next" ? "slide-in-left" : "slide-in-right"); }
+}
+
+function toast(msg){
+  const t = el("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 1800);
+}
+function goPrev(){ if (todayNum + offset > 0) { offset--; render("prev"); } }
+function goNext(){
+  if (offset < 0) { offset++; render("next"); }
+  else toast("明天才有新的車車唷 🤫");
+}
+el("prev").onclick = goPrev;
+el("next").onclick = goNext;
+el("backtoday").onclick = () => { offset = 0; render("next"); };
+
+/* 手指滑動（Pointer 事件：手機觸控與桌機拖曳都支援） */
+let sx = null, sy = null;
+const stage = el("stage");
+stage.addEventListener("pointerdown", e => { sx = e.clientX; sy = e.clientY; }, {passive:true});
+stage.addEventListener("pointerup", e => {
+  if (sx === null) return;
+  const dx = e.clientX - sx;
+  const dy = e.clientY - sy;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) { dx < 0 ? goNext() : goPrev(); }
+  sx = sy = null;
+}, {passive:true});
+stage.addEventListener("pointercancel", () => { sx = sy = null; }, {passive:true});
+
+/* 詞彙彈出卡 */
+document.addEventListener("click", e => {
+  const b = e.target.closest(".w");
+  if (!b) return;
+  const d = DICT[b.dataset.w];
+  el("s-emoji").textContent = d.emoji;
+  el("s-word").textContent = b.dataset.w;
+  el("s-desc").textContent = d.desc;
+  el("sheet-mask").classList.add("open");
+});
+el("s-close").onclick = () => el("sheet-mask").classList.remove("open");
+el("sheet-mask").addEventListener("click", e => { if (e.target === el("sheet-mask")) el("sheet-mask").classList.remove("open"); });
+
+render();
 </script>
 </body>
 </html>
